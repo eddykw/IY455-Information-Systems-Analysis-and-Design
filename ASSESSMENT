@@ -1,0 +1,15 @@
+-- DVD LOAN MANAGEMENT SYSTEM
+
+DROP DATABASE IF EXISTS dvd_loan_system;
+CREATE DATABASE dvd_loan_system;
+USE dvd_loan_system;
+
+
+-- TABLE CREATION
+
+
+CREATE TABLE BORROWER_STATUS (
+                                 StatusCode  CHAR(3)     NOT NULL,
+                                 StatusDesc  VARCHAR(20) NOT NULL,
+                                 CONSTRAINT PK_BORROWER_STATUS PRIMARY KEY (StatusCode)
+);
