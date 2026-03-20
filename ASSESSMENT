@@ -13,3 +13,9 @@ CREATE TABLE BORROWER_STATUS (
                                  StatusDesc  VARCHAR(20) NOT NULL,
                                  CONSTRAINT PK_BORROWER_STATUS PRIMARY KEY (StatusCode)
 );
+
+CREATE TABLE DVD_STATUS (
+                            StatusCode  CHAR(3)     NOT NULL,
+                            StatusDesc  VARCHAR(20) NOT NULL,
+                            CONSTRAINT PK_DVD_STATUS PRIMARY KEY (StatusCode)
+);
