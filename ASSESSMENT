@@ -19,3 +19,18 @@ CREATE TABLE DVD_STATUS (
                             StatusDesc  VARCHAR(20) NOT NULL,
                             CONSTRAINT PK_DVD_STATUS PRIMARY KEY (StatusCode)
 );
+
+CREATE TABLE DVD_STATUS (
+                            StatusCode  CHAR(3)     NOT NULL,
+                            StatusDesc  VARCHAR(20) NOT NULL,
+                            CONSTRAINT PK_DVD_STATUS PRIMARY KEY (StatusCode)
+);
+
+CREATE TABLE RENTAL_CATEGORY (
+                                 RentalCategoryID    CHAR(4)      NOT NULL,
+                                 CategoryName        VARCHAR(30)  NOT NULL,
+                                 RentalDuration      INT          NOT NULL,
+                                 RentalCost          DECIMAL(5,2) NOT NULL,
+                                 FineChargePerDay    DECIMAL(5,2) NOT NULL,
+                                 CONSTRAINT PK_RENTAL_CATEGORY PRIMARY KEY (RentalCategoryID)
+);
