@@ -34,3 +34,41 @@ CREATE TABLE RENTAL_CATEGORY (
                                  FineChargePerDay    DECIMAL(5,2) NOT NULL,
                                  CONSTRAINT PK_RENTAL_CATEGORY PRIMARY KEY (RentalCategoryID)
 );
+
+
+CREATE TABLE SUPPLIER (
+                          SupplierNo      CHAR(5)      NOT NULL,
+                          SupplierName    VARCHAR(50)  NOT NULL,
+                          SupplierAddress VARCHAR(100) NOT NULL,
+                          CONSTRAINT PK_SUPPLIER PRIMARY KEY (SupplierNo)
+);
+
+CREATE TABLE BORROWER (
+                          BorrowerNo      CHAR(6)      NOT NULL,
+                          BorrowerName    VARCHAR(50)  NOT NULL,
+                          BorrowerAddress VARCHAR(100) NOT NULL,
+                          BorrowerStatus  CHAR(3)      NOT NULL,
+                          CONSTRAINT PK_BORROWER PRIMARY KEY (BorrowerNo),
+                          CONSTRAINT FK_BORROWER_STATUS FOREIGN KEY (BorrowerStatus)
+                              REFERENCES BORROWER_STATUS(StatusCode)
+);
+
+CREATE TABLE LOAN (
+                      LoanNo      CHAR(7) NOT NULL,
+                      BorrowerNo  CHAR(6) NOT NULL,
+                      LoanDate    DATE    NOT NULL,
+                      CONSTRAINT PK_LOAN PRIMARY KEY (LoanNo),
+                      CONSTRAINT FK_LOAN_BORROWER FOREIGN KEY (BorrowerNo)
+                          REFERENCES BORROWER(BorrowerNo)
+);
+
+CREATE TABLE DVD (
+                     DVDNo            VARCHAR(7)   NOT NULL,
+                     DVDTitle         VARCHAR(100) NOT NULL,
+                     StarringActor    VARCHAR(50)  NOT NULL,
+                     DVDYear          YEAR         NOT NULL,
+                     RentalCategoryID CHAR(4)      NOT NULL,
+                     CONSTRAINT PK_DVD PRIMARY KEY (DVDNo),
+                     CONSTRAINT FK_DVD_CATEGORY FOREIGN KEY (RentalCategoryID)
+                         REFERENCES RENTAL_CATEGORY(RentalCategoryID)
+);
