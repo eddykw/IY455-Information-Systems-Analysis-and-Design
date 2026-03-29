@@ -41,6 +41,29 @@ WHERE lc.ActualReturnDate IS NULL
 GROUP BY b.BorrowerNo, b.BorrowerName, b.BorrowerAddress, bs.StatusDesc
 ORDER BY TotalFineAccumulated DESC;
 
+-- QUERY 3
+-- Borrowers who rented comedy movies in the last 4 weeks
+
+
+SELECT
+    b.BorrowerNo,
+    b.BorrowerName,
+    b.BorrowerAddress,
+    d.DVDTitle,
+    rc.CategoryName         AS RentalCategory,
+    l.LoanDate,
+    lc.ReturnDueDate,
+    lc.ActualReturnDate
+FROM BORROWER b
+         JOIN LOAN l              ON b.BorrowerNo         = l.BorrowerNo
+         JOIN LOAN_COPY lc        ON l.LoanNo             = lc.LoanNo
+         JOIN `COPY` c            ON lc.CopyNo            = c.CopyNo
+         JOIN DVD d               ON c.DVDNo              = d.DVDNo
+         JOIN RENTAL_CATEGORY rc  ON d.RentalCategoryID   = rc.RentalCategoryID
+WHERE rc.CategoryName = 'Comedy'
+  AND l.LoanDate >= DATE_SUB(CURDATE(), INTERVAL 4 WEEK)
+ORDER BY b.BorrowerName, l.LoanDate;
+
 
 
 
