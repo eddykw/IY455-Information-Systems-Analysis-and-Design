@@ -1,0 +1,46 @@
+
+USE dvd_loan_system;
+
+
+-- QUERY 1
+-- Output borrowers with current rentals (not returned)
+-- Ordered by surname
+
+SELECT DISTINCT
+    b.BorrowerNo,
+    b.BorrowerName,
+    b.BorrowerAddress,
+    bs.StatusDesc AS BorrowerStatus
+FROM BORROWER b
+         JOIN BORROWER_STATUS bs ON b.BorrowerStatus = bs.StatusCode
+         JOIN LOAN l             ON b.BorrowerNo     = l.BorrowerNo
+         JOIN LOAN_COPY lc       ON l.LoanNo         = lc.LoanNo
+WHERE lc.ActualReturnDate IS NULL
+ORDER BY SUBSTRING_INDEX(b.BorrowerName, ' ', -1);
+
+
+
+-- QUERY 2
+-- Borrowers with overdue loans ranked highest to lowest
+-- Overdue = not yet returned AND past the due date
+
+
+SELECT
+    b.BorrowerNo,
+    b.BorrowerName,
+    b.BorrowerAddress,
+    bs.StatusDesc           AS BorrowerStatus,
+    COUNT(lc.CopyNo)        AS OverdueItems,
+    SUM(lc.FineCharge)      AS TotalFineAccumulated
+FROM BORROWER b
+         JOIN BORROWER_STATUS bs ON b.BorrowerStatus = bs.StatusCode
+         JOIN LOAN l             ON b.BorrowerNo     = l.BorrowerNo
+         JOIN LOAN_COPY lc       ON l.LoanNo         = lc.LoanNo
+WHERE lc.ActualReturnDate IS NULL
+  AND lc.ReturnDueDate < CURDATE()
+GROUP BY b.BorrowerNo, b.BorrowerName, b.BorrowerAddress, bs.StatusDesc
+ORDER BY TotalFineAccumulated DESC;
+
+
+
+
