@@ -1,3 +1,4 @@
+-- Task 4 - SQL Queries to Adapt Data and Show Information
 
 USE dvd_loan_system;
 
@@ -41,6 +42,8 @@ WHERE lc.ActualReturnDate IS NULL
 GROUP BY b.BorrowerNo, b.BorrowerName, b.BorrowerAddress, bs.StatusDesc
 ORDER BY TotalFineAccumulated DESC;
 
+
+
 -- QUERY 3
 -- Borrowers who rented comedy movies in the last 4 weeks
 
@@ -64,6 +67,117 @@ WHERE rc.CategoryName = 'Comedy'
   AND l.LoanDate >= DATE_SUB(CURDATE(), INTERVAL 4 WEEK)
 ORDER BY b.BorrowerName, l.LoanDate;
 
+
+
+-- QUERY 4
+-- Borrower with the highest accumulated unpaid fines
+
+
+SELECT
+    b.BorrowerNo,
+    b.BorrowerName,
+    b.BorrowerAddress,
+    bs.StatusDesc           AS BorrowerStatus,
+    COUNT(lc.CopyNo)        AS NumberOfFines,
+    SUM(lc.FineCharge)      AS TotalUnpaidFines
+FROM BORROWER b
+         JOIN BORROWER_STATUS bs ON b.BorrowerStatus = bs.StatusCode
+         JOIN LOAN l             ON b.BorrowerNo     = l.BorrowerNo
+         JOIN LOAN_COPY lc       ON l.LoanNo         = lc.LoanNo
+WHERE lc.FinePaid = 'N'
+  AND lc.FineCharge > 0
+GROUP BY b.BorrowerNo, b.BorrowerName, b.BorrowerAddress, bs.StatusDesc
+ORDER BY TotalUnpaidFines DESC
+LIMIT 1;
+
+
+
+-- QUERY 5
+-- Update rental cost to £5.50 for Superhero DVDs from 2015 onwards
+
+
+-- Step 1: Check which DVDs will be affected BEFORE the update
+SELECT
+    d.DVDNo,
+    d.DVDTitle,
+    d.DVDYear,
+    rc.CategoryName,
+    rc.RentalCost           AS CostBefore
+FROM DVD d
+         JOIN RENTAL_CATEGORY rc ON d.RentalCategoryID = rc.RentalCategoryID
+WHERE rc.CategoryName = 'Superhero'
+  AND d.DVDYear >= 2015;
+
+-- Step 2: Add new category row for updated Superhero pricing
+INSERT IGNORE INTO RENTAL_CATEGORY VALUES
+    ('RC06B', 'Superhero', 3, 5.50, 1.50);
+
+-- Step 3: Reassign post-2015 Superhero DVDs to new category
+UPDATE DVD
+SET RentalCategoryID = 'RC06B'
+WHERE RentalCategoryID = 'RC06'
+  AND DVDYear >= 2015;
+
+-- Step 4: Confirm the update worked
+SELECT
+    d.DVDNo,
+    d.DVDTitle,
+    d.DVDYear,
+    rc.CategoryName,
+    rc.RentalCost           AS CostAfter
+FROM DVD d
+         JOIN RENTAL_CATEGORY rc ON d.RentalCategoryID = rc.RentalCategoryID
+WHERE rc.CategoryName = 'Superhero'
+  AND d.DVDYear >= 2015;
+
+
+
+-- QUERY 6
+-- Remove DVDs with no loan history
+-- Step 1: delete COPY rows first (foreign key dependency)
+-- Step 2: then delete the DVD rows
+
+
+-- Check which DVDs have no loans BEFORE deleting
+SELECT
+    d.DVDNo,
+    d.DVDTitle,
+    d.DVDYear,
+    rc.CategoryName
+FROM DVD d
+         JOIN RENTAL_CATEGORY rc ON d.RentalCategoryID = rc.RentalCategoryID
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM `COPY` c
+             JOIN LOAN_COPY lc ON c.CopyNo = lc.CopyNo
+    WHERE c.DVDNo = d.DVDNo
+);
+
+-- Step 1: Delete COPY rows that have never been loaned
+DELETE FROM `COPY`
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM LOAN_COPY lc
+    WHERE lc.CopyNo = `COPY`.CopyNo
+);
+
+-- Step 2: Delete DVD rows that now have no copies left
+DELETE FROM DVD
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM `COPY` c
+    WHERE c.DVDNo = DVD.DVDNo
+);
+
+-- Confirm remaining DVDs after deletion
+SELECT
+    d.DVDNo,
+    d.DVDTitle,
+    d.DVDYear,
+    rc.CategoryName
+FROM DVD d
+         JOIN RENTAL_CATEGORY rc ON d.RentalCategoryID = rc.RentalCategoryID
+ORDER BY d.DVDTitle;
 
 
 
